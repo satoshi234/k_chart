@@ -136,8 +136,8 @@ class _KChartWidgetState extends State<KChartWidget>
   bool waitingForOtherPairofCords = false;
   bool enableCordRecord = false;
 
+  // チャート群表示領域の高さに占める、Secondaryチャートの高さの比率
   double _mSecondaryScale = 0.2;
-  double _lastSecondaryScale = 0.2;
 
   double getMinScrollX() {
     return mScaleX;
@@ -145,6 +145,9 @@ class _KChartWidgetState extends State<KChartWidget>
 
   double _lastScale = 1.0;
   bool isScale = false, isDrag = false, isLongPress = false, isOnTap = false;
+
+  // gesture
+  bool? _isVertical;
 
   @override
   void initState() {
@@ -205,6 +208,8 @@ class _KChartWidgetState extends State<KChartWidget>
 
         return GestureDetector(
           onTapUp: (details) {
+            print('onTapUp');
+
             if (!widget.isTrendLine &&
                 _painter.isInSecondaryRect(details.localPosition)) {
               if (widget.onSecondaryTap != null) {
@@ -248,53 +253,88 @@ class _KChartWidgetState extends State<KChartWidget>
               notifyChanged();
             }
           },
-          onHorizontalDragDown: (details) {
-            isOnTap = false;
-            _stopAnimation();
-            _onDragChanged(true);
-          },
-          onHorizontalDragUpdate: (details) {
-            print('onHorizontalDragUpdate');
+          // onHorizontalDragDown: (details) {
+          //   isOnTap = false;
+          //   _stopAnimation();
+          //   _onDragChanged(true);
+          // },
+          // onHorizontalDragUpdate: (details) {
+          //   print('onHorizontalDragUpdate');
 
-            if (isScale || isLongPress) return;
-            mScrollX = ((details.primaryDelta ?? 0) / mScaleX + mScrollX)
-                .clamp(0.0, ChartPainter.maxScrollX)
-                .toDouble();
-            notifyChanged();
-          },
-          onHorizontalDragEnd: (DragEndDetails details) {
-            var velocity = details.velocity.pixelsPerSecond.dx;
-            _onFling(velocity);
-          },
-          onHorizontalDragCancel: () {
-            print('onHorizontalDragCancel');
+          //   if (isScale || isLongPress) return;
+          //   mScrollX = ((details.primaryDelta ?? 0) / mScaleX + mScrollX)
+          //       .clamp(0.0, ChartPainter.maxScrollX)
+          //       .toDouble();
+          //   notifyChanged();
+          // },
+          // onHorizontalDragEnd: (DragEndDetails details) {
+          //   var velocity = details.velocity.pixelsPerSecond.dx;
+          //   _onFling(velocity);
+          // },
+          // onHorizontalDragCancel: () {
+          //   print('onHorizontalDragCancel');
 
-            _onDragChanged(false);
-          },
+          //   _onDragChanged(false);
+          // },
           onScaleStart: (details) {
+            // スケール変更開始
             print('onScaleStart');
 
-            // x軸のスケール変更開始
-            isScale = true;
+            _stopAnimation();
+
+            isOnTap = false;
+            _isVertical = null;
+            if (details.pointerCount == 1) {
+              // _onDragChanged(true);
+              isDrag = true;
+              isScale = false;
+            } else if (details.pointerCount == 2) {
+              // _onDragChanged(false);
+              isDrag = false;
+              isScale = true;
+            } else {
+              // _onDragChanged(true);
+              isDrag = true;
+              isScale = false;
+            }
           },
           onScaleUpdate: (details) {
             print('onScaleUpdate');
 
-            if (isDrag || isLongPress) {
+            if (isLongPress) {
               return;
             }
 
-            if (details.pointerCount == 1) {
+            if (_isVertical == null) {
+              // 初回のみ方向を判定する
+              final dx = details.focalPointDelta.dx.abs();
+              final dy = details.focalPointDelta.dy.abs();
+
+              // y軸方向のスクロールの方が、x軸方向のそれよりも大きい場合は縦方向と判定する
+              _isVertical ??= dy > dx;
+            }
+
+            if (isDrag) {
               // 1点ポインターである場合
 
-              print('delta: ${details.focalPointDelta}');
+              // print('delta: ${details.focalPointDelta}');
 
-              if (_painter.isInSecondaryRect(details.localFocalPoint)) {
-                // Secondaryチャートのスケールを変更する
-                // * ある一定値の中に収まるように調整する
-                final deltaScale = details.focalPointDelta.dy / mHeight;
-                _mSecondaryScale =
-                    (_mSecondaryScale - deltaScale).clamp(0.1, 0.9);
+              if (_isVertical == true) {
+                if (_painter.isInSecondaryRect(details.localFocalPoint)) {
+                  // Secondaryチャートのスケールを変更する
+                  // * ある一定値の中に収まるように調整する
+                  final deltaScale = details.focalPointDelta.dy / mHeight;
+                  _mSecondaryScale =
+                      (_mSecondaryScale - deltaScale).clamp(0.1, 0.9);
+
+                  notifyChanged();
+                }
+              } else if (_isVertical == false) {
+                final dx = details.focalPointDelta.dx;
+
+                mScrollX = (dx / mScaleX + mScrollX)
+                    .clamp(0.0, ChartPainter.maxScrollX)
+                    .toDouble();
 
                 notifyChanged();
               }
@@ -307,12 +347,21 @@ class _KChartWidgetState extends State<KChartWidget>
               notifyChanged();
             }
           },
-          onScaleEnd: (_) {
+          onScaleEnd: (details) {
             print('onScaleEnd');
 
-            // x軸のスケール変更終了
-            // スケールの値を保存する
+            if (isDrag && _isVertical == true) {
+              // 水平方向スクロールの場合
+              final velocity = details.velocity.pixelsPerSecond.dx;
+              _onFling(velocity);
+            }
+
+            // スケール変更終了
+            isOnTap = false;
             isScale = false;
+            isDrag = false;
+
+            // スケールの値を保存する
             _lastScale = mScaleX;
           },
           onLongPressStart: (details) {
@@ -442,83 +491,101 @@ class _KChartWidgetState extends State<KChartWidget>
 
   Widget _buildInfoDialog() {
     return StreamBuilder<InfoWindowEntity?>(
-        stream: mInfoWindowStream?.stream,
-        builder: (context, snapshot) {
-          if ((!isLongPress && !isOnTap) ||
-              widget.isLine == true ||
-              !snapshot.hasData ||
-              snapshot.data?.kLineEntity == null) return Container();
-          KLineEntity entity = snapshot.data!.kLineEntity;
-          double upDown = entity.change ?? entity.close - entity.open;
-          double upDownPercent = entity.ratio ?? (upDown / entity.open) * 100;
-          final double? entityAmount = entity.amount;
-          infos = [
-            getDate(entity.time),
-            entity.open.toStringAsFixed(widget.fixedLength),
-            entity.high.toStringAsFixed(widget.fixedLength),
-            entity.low.toStringAsFixed(widget.fixedLength),
-            entity.close.toStringAsFixed(widget.fixedLength),
-            "${upDown > 0 ? "+" : ""}${upDown.toStringAsFixed(widget.fixedLength)}",
-            "${upDownPercent > 0 ? "+" : ''}${upDownPercent.toStringAsFixed(2)}%",
-            if (entityAmount != null) entityAmount.toInt().toString()
-          ];
-          final dialogPadding = 4.0;
-          final dialogWidth = mWidth / 3;
-          return Container(
-            margin: EdgeInsets.only(
-                left: snapshot.data!.isLeft
-                    ? dialogPadding
-                    : mWidth - dialogWidth - dialogPadding,
-                top: 25),
-            width: dialogWidth,
-            decoration: BoxDecoration(
-                color: widget.chartColors.selectFillColor,
-                border: Border.all(
-                    color: widget.chartColors.selectBorderColor, width: 0.5)),
-            child: ListView.builder(
-              padding: EdgeInsets.all(dialogPadding),
-              itemCount: infos.length,
-              itemExtent: 14.0,
-              shrinkWrap: true,
-              itemBuilder: (context, index) {
-                final translations = widget.isChinese
-                    ? kChartTranslations['zh_CN']!
-                    : widget.translations.of(context);
-
-                return _buildItem(
-                  infos[index],
-                  translations.byIndex(index),
-                );
-              },
+      stream: mInfoWindowStream?.stream,
+      builder: (context, snapshot) {
+        if ((!isLongPress && !isOnTap) ||
+            widget.isLine == true ||
+            !snapshot.hasData ||
+            snapshot.data?.kLineEntity == null) return Container();
+        KLineEntity entity = snapshot.data!.kLineEntity;
+        double upDown = entity.change ?? entity.close - entity.open;
+        double upDownPercent = entity.ratio ?? (upDown / entity.open) * 100;
+        final double? entityAmount = entity.amount;
+        infos = [
+          getDate(entity.time),
+          entity.open.toStringAsFixed(widget.fixedLength),
+          entity.high.toStringAsFixed(widget.fixedLength),
+          entity.low.toStringAsFixed(widget.fixedLength),
+          entity.close.toStringAsFixed(widget.fixedLength),
+          "${upDown > 0 ? "+" : ""}${upDown.toStringAsFixed(widget.fixedLength)}",
+          "${upDownPercent > 0 ? "+" : ''}${upDownPercent.toStringAsFixed(2)}%",
+          if (entityAmount != null) entityAmount.toInt().toString()
+        ];
+        final dialogPadding = 4.0;
+        final dialogWidth = mWidth / 3;
+        return Container(
+          margin: EdgeInsets.only(
+              left: snapshot.data!.isLeft
+                  ? dialogPadding
+                  : mWidth - dialogWidth - dialogPadding,
+              top: 25),
+          width: dialogWidth,
+          decoration: BoxDecoration(
+            color: widget.chartColors.selectFillColor,
+            border: Border.all(
+              color: widget.chartColors.selectBorderColor,
+              width: 0.5,
             ),
-          );
-        });
+          ),
+          child: ListView.builder(
+            padding: EdgeInsets.all(dialogPadding),
+            itemCount: infos.length,
+            itemExtent: 14.0,
+            shrinkWrap: true,
+            itemBuilder: (context, index) {
+              final translations = widget.translations.of(context);
+
+              return _buildItem(
+                infos[index],
+                translations.byIndex(index),
+              );
+            },
+          ),
+        );
+      },
+    );
   }
 
   Widget _buildItem(String info, String infoName) {
     Color color = widget.chartColors.infoWindowNormalColor;
-    if (info.startsWith("+"))
+    if (info.startsWith("+")) {
       color = widget.chartColors.infoWindowUpColor;
-    else if (info.startsWith("-")) color = widget.chartColors.infoWindowDnColor;
+    } else if (info.startsWith("-")) {
+      color = widget.chartColors.infoWindowDnColor;
+    }
+
     final infoWidget = Row(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         Expanded(
-            child: Text("$infoName",
-                style: TextStyle(
-                    color: widget.chartColors.infoWindowTitleColor,
-                    fontSize: 10.0))),
-        Text(info, style: TextStyle(color: color, fontSize: 10.0)),
+          child: Text(
+            "$infoName",
+            style: TextStyle(
+              color: widget.chartColors.infoWindowTitleColor,
+              fontSize: 10.0,
+            ),
+          ),
+        ),
+        Text(
+          info,
+          style: TextStyle(
+            color: color,
+            fontSize: 10.0,
+          ),
+        ),
       ],
     );
+
     return widget.materialInfoDialog
         ? Material(color: Colors.transparent, child: infoWidget)
         : infoWidget;
   }
 
   String getDate(int? date) => dateFormat(
-      DateTime.fromMillisecondsSinceEpoch(
-          date ?? DateTime.now().millisecondsSinceEpoch),
-      widget.timeFormat);
+        DateTime.fromMillisecondsSinceEpoch(
+          date ?? DateTime.now().millisecondsSinceEpoch,
+        ),
+        widget.timeFormat,
+      );
 }

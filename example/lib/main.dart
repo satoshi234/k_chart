@@ -6,12 +6,18 @@ import 'package:http/http.dart' as http;
 import 'package:k_chart/chart_translations.dart';
 import 'package:k_chart/flutter_k_chart.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      locale: const Locale('ja', 'JP'),
+      supportedLocales: const [
+        Locale('ja', 'JP'),
+      ],
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.green,
@@ -113,8 +119,6 @@ class _MyHomePageState extends State<MyHomePage> {
         timeFormat: TimeFormat.YEAR_MONTH_DAY,
         translations: kChartTranslations,
         showNowPrice: _showNowPrice,
-        //`isChinese` is Deprecated, Use `translations` instead.
-        isChinese: isChinese,
         hideGrid: _hideGrid,
         isTapShowInfoDialog: false,
         verticalTextAlignment: _verticalTextAlignment,
