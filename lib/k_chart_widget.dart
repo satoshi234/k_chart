@@ -586,6 +586,6 @@ class _KChartWidgetState extends State<KChartWidget>
         DateTime.fromMillisecondsSinceEpoch(
           date ?? DateTime.now().millisecondsSinceEpoch,
         ),
-        widget.timeFormat,
+        TimeFormat.YEAR_MONTH_DAY,
       );
 }
