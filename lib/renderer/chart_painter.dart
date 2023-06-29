@@ -74,20 +74,22 @@ class ChartPainter extends BaseChartPainter {
     this.showNowPrice = true,
     this.fixedLength = 2,
     this.maDayList = const [5, 10, 20],
-  }) : super(chartStyle,
-            datas: datas,
-            scaleX: scaleX,
-            scrollX: scrollX,
-            isLongPress: isLongPass,
-            isOnTap: isOnTap,
-            isTapShowInfoDialog: isTapShowInfoDialog,
-            selectX: selectX,
-            mainState: mainState,
-            volHidden: volHidden,
-            secondaryState: secondaryState,
-            secondaryScale: secondaryScale,
-            xFrontPadding: xFrontPadding,
-            isLine: isLine) {
+  }) : super(
+          chartStyle,
+          datas: datas,
+          scaleX: scaleX,
+          scrollX: scrollX,
+          isLongPress: isLongPass,
+          isOnTap: isOnTap,
+          isTapShowInfoDialog: isTapShowInfoDialog,
+          selectX: selectX,
+          mainState: mainState,
+          volHidden: volHidden,
+          secondaryState: secondaryState,
+          secondaryScale: secondaryScale,
+          xFrontPadding: xFrontPadding,
+          isLine: isLine,
+        ) {
     selectPointPaint = Paint()
       ..isAntiAlias = true
       ..strokeWidth = 0.5
@@ -106,9 +108,14 @@ class ChartPainter extends BaseChartPainter {
   void initChartRenderer() {
     if (datas != null && datas!.isNotEmpty) {
       var t = datas![0];
-      fixedLength =
-          NumberUtil.getMaxDecimalLength(t.open, t.close, t.high, t.low);
+      fixedLength = NumberUtil.getMaxDecimalLength(
+        t.open,
+        t.close,
+        t.high,
+        t.low,
+      );
     }
+
     mMainRenderer = MainRenderer(
       mMainRect,
       mMainMaxValue,
@@ -148,6 +155,7 @@ class ChartPainter extends BaseChartPainter {
     }
   }
 
+  /// 背景を描画する
   @override
   void drawBg(Canvas canvas, Size size) {
     Paint mBgPaint = Paint();
@@ -156,30 +164,56 @@ class ChartPainter extends BaseChartPainter {
       end: Alignment.topCenter,
       colors: chartColors.bgColor,
     );
-    Rect mainRect =
-        Rect.fromLTRB(0, 0, mMainRect.width, mMainRect.height + mTopPadding);
+    Rect mainRect = Rect.fromLTRB(
+      0,
+      0,
+      mMainRect.width,
+      mMainRect.height + mTopPadding,
+    );
     canvas.drawRect(
-        mainRect, mBgPaint..shader = mBgGradient.createShader(mainRect));
+      mainRect,
+      mBgPaint..shader = mBgGradient.createShader(mainRect),
+    );
 
     if (mVolRect != null) {
       Rect volRect = Rect.fromLTRB(
-          0, mVolRect!.top - mChildPadding, mVolRect!.width, mVolRect!.bottom);
+        0,
+        mVolRect!.top - mChildPadding,
+        mVolRect!.width,
+        mVolRect!.bottom,
+      );
       canvas.drawRect(
-          volRect, mBgPaint..shader = mBgGradient.createShader(volRect));
+        volRect,
+        mBgPaint..shader = mBgGradient.createShader(volRect),
+      );
     }
 
     if (mSecondaryRect != null) {
-      Rect secondaryRect = Rect.fromLTRB(0, mSecondaryRect!.top - mChildPadding,
-          mSecondaryRect!.width, mSecondaryRect!.bottom);
-      canvas.drawRect(secondaryRect,
-          mBgPaint..shader = mBgGradient.createShader(secondaryRect));
+      Rect secondaryRect = Rect.fromLTRB(
+        0,
+        mSecondaryRect!.top - mChildPadding,
+        mSecondaryRect!.width,
+        mSecondaryRect!.bottom,
+      );
+      canvas.drawRect(
+        secondaryRect,
+        mBgPaint..shader = mBgGradient.createShader(secondaryRect),
+      );
     }
-    Rect dateRect =
-        Rect.fromLTRB(0, size.height - mBottomPadding, size.width, size.height);
+
+    Rect dateRect = Rect.fromLTRB(
+      0,
+      size.height - mBottomPadding,
+      size.width,
+      size.height,
+    );
     canvas.drawRect(
-        dateRect, mBgPaint..shader = mBgGradient.createShader(dateRect));
+      dateRect,
+      mBgPaint..shader = mBgGradient.createShader(dateRect),
+    );
   }
 
+  /// グリッドを描画する
   @override
   void drawGrid(canvas) {
     if (!hideGrid) {
@@ -189,6 +223,7 @@ class ChartPainter extends BaseChartPainter {
     }
   }
 
+  /// チャートを描画する
   @override
   void drawChart(Canvas canvas, Size size) {
     // restore()で戻れるようにするために、save()する。
@@ -252,6 +287,7 @@ class ChartPainter extends BaseChartPainter {
     canvas.restore();
   }
 
+  /// 横線の値を描画する
   @override
   void drawVerticalText(canvas) {
     var textStyle = getTextStyle(this.chartColors.defaultTextColor);
@@ -262,6 +298,7 @@ class ChartPainter extends BaseChartPainter {
     mSecondaryRenderer?.drawVerticalText(canvas, textStyle, mGridRows);
   }
 
+  /// 日付を描画する
   @override
   void drawDate(Canvas canvas, Size size) {
     if (datas == null) return;
@@ -281,9 +318,11 @@ class ChartPainter extends BaseChartPainter {
         TextPainter tp = getTextPainter(getDate(datas![index].time), null);
         y = size.height - (mBottomPadding - tp.height) / 2 - tp.height;
         x = columnSpace * i - tp.width / 2;
+
         // Prevent date text out of canvas
         if (x < 0) x = 0;
         if (x > size.width - tp.width) x = size.width - tp.width;
+
         tp.paint(canvas, Offset(x, y));
       }
     }
@@ -300,6 +339,7 @@ class ChartPainter extends BaseChartPainter {
 //    }
   }
 
+  /// 十字線の値のテキストを描画する
   @override
   void drawCrossLineText(Canvas canvas, Size size) {
     var index = calculateSelectedX(selectX);
@@ -343,8 +383,10 @@ class ChartPainter extends BaseChartPainter {
       tp.paint(canvas, Offset(x + w1 + w2, y - textHeight / 2));
     }
 
-    TextPainter dateTp =
-        getTextPainter(getDate(point.time), chartColors.crossTextColor);
+    TextPainter dateTp = getTextPainter(
+      getDate(point.time),
+      chartColors.crossTextColor,
+    );
     textWidth = dateTp.width;
     r = textHeight / 2;
     x = translateXtoX(getX(index));
@@ -355,18 +397,30 @@ class ChartPainter extends BaseChartPainter {
     } else if (mWidth - x < textWidth + 2 * w1) {
       x = mWidth - 1 - textWidth / 2 - w1;
     }
+
     double baseLine = textHeight / 2;
     canvas.drawRect(
-        Rect.fromLTRB(x - textWidth / 2 - w1, y, x + textWidth / 2 + w1,
-            y + baseLine + r),
-        selectPointPaint);
+      Rect.fromLTRB(
+        x - textWidth / 2 - w1,
+        y,
+        x + textWidth / 2 + w1,
+        y + baseLine + r,
+      ),
+      selectPointPaint,
+    );
     canvas.drawRect(
-        Rect.fromLTRB(x - textWidth / 2 - w1, y, x + textWidth / 2 + w1,
-            y + baseLine + r),
-        selectorBorderPaint);
+      Rect.fromLTRB(
+        x - textWidth / 2 - w1,
+        y,
+        x + textWidth / 2 + w1,
+        y + baseLine + r,
+      ),
+      selectorBorderPaint,
+    );
 
     dateTp.paint(canvas, Offset(x - textWidth / 2, y));
-    //长按显示这条数据详情
+
+    // データウィンドウに表示するデータをstreamに流す
     sink?.add(InfoWindowEntity(point, isLeft: isLeft));
   }
 
@@ -383,9 +437,14 @@ class ChartPainter extends BaseChartPainter {
     mSecondaryRenderer?.drawText(canvas, data, x);
   }
 
+  /// 現在、ディスプレイ内に表示している範囲での、価格の最大値と最小値を描画する
   @override
   void drawMaxAndMin(Canvas canvas) {
-    if (isLine == true) return;
+    if (isLine) {
+      // ラインチャートの場合は、最大値と最小値を描画しない
+      return;
+    }
+
     double lineSize = 20;
     double lineToTextOffset = 5;
 
@@ -393,11 +452,11 @@ class ChartPainter extends BaseChartPainter {
       ..strokeWidth = 1
       ..color = chartColors.minColor;
 
-    //绘制最大值和最小值
+    // 最小値
     double x = translateXtoX(getX(mMainMinIndex));
     double y = getMainY(mMainLowMinValue);
     if (x < mWidth / 2) {
-      //画右边
+      // 座標が、画面の左側にある場合
       TextPainter tp = getTextPainter(
         mMainLowMinValue.toStringAsFixed(fixedLength),
         chartColors.minColor,
@@ -417,6 +476,7 @@ class ChartPainter extends BaseChartPainter {
         ),
       );
     } else {
+      // 座標が、画面の右側にある場合
       TextPainter tp = getTextPainter(
         mMainLowMinValue.toStringAsFixed(fixedLength),
         chartColors.minColor,
@@ -437,10 +497,11 @@ class ChartPainter extends BaseChartPainter {
       );
     }
 
+    // 最大値
     x = translateXtoX(getX(mMainMaxIndex));
     y = getMainY(mMainHighMaxValue);
     if (x < mWidth / 2) {
-      //画右边
+      // 座標が、画面の左側にある場合
       TextPainter tp = getTextPainter(
         mMainHighMaxValue.toStringAsFixed(fixedLength),
         chartColors.maxColor,
@@ -460,6 +521,7 @@ class ChartPainter extends BaseChartPainter {
         ),
       );
     } else {
+      // 座標が、画面の右側にある場合
       TextPainter tp = getTextPainter(
         mMainHighMaxValue.toStringAsFixed(fixedLength),
         chartColors.maxColor,
@@ -481,47 +543,62 @@ class ChartPainter extends BaseChartPainter {
     }
   }
 
+  /// 現在価格を描画する
   @override
   void drawNowPrice(Canvas canvas) {
     if (!this.showNowPrice) {
+      // 現在価格を表示しない場合
+      // 現在価格を表示しない
       return;
     }
 
     if (datas == null) {
+      // データがない場合
+      // 現在価格を表示しない
       return;
     }
 
-    double value = datas!.last.close;
-    double y = getMainY(value);
-
-    //视图展示区域边界值绘制
-    if (y > getMainY(mMainLowMinValue)) {
-      y = getMainY(mMainLowMinValue);
+    // 現在価格
+    double nowPrice = datas!.last.close;
+    if (nowPrice > mMainHighMaxValue) {
+      // 現在価格が、チャート描画範囲の最大値を上回る場合
+      // 現在価格を表示しない
+      return;
+    }
+    if (nowPrice < mMainLowMinValue) {
+      // 現在価格が、チャート描画範囲の最小値を下回る場合
+      // 現在価格を表示しない
+      return;
     }
 
-    if (y < getMainY(mMainHighMaxValue)) {
-      y = getMainY(mMainHighMaxValue);
-    }
+    // 現在価格のY座標
+    double y = getMainY(nowPrice);
 
-    nowPricePaint
-      ..color = value >= datas!.last.open
-          ? this.chartColors.nowPriceUpColor
-          : this.chartColors.nowPriceDnColor;
-    //先画横线
+    // nowPricePaint
+    //   ..color = value >= datas!.last.open
+    //       ? this.chartColors.nowPriceUpColor
+    //       : this.chartColors.nowPriceDnColor;
+    nowPricePaint..color = this.chartColors.nowPriceUpColor;
+
+    // 現在価格の破線を描画する
     double startX = 0;
     final max = -mTranslateX + mWidth / scaleX;
     final space =
         this.chartStyle.nowPriceLineSpan + this.chartStyle.nowPriceLineLength;
     while (startX < max) {
       canvas.drawLine(
-          Offset(startX, y),
-          Offset(startX + this.chartStyle.nowPriceLineLength, y),
-          nowPricePaint);
+        Offset(startX, y),
+        Offset(startX + this.chartStyle.nowPriceLineLength, y),
+        nowPricePaint,
+      );
       startX += space;
     }
-    //再画背景和文本
+
+    // 現在価格のテキストを描画する
     TextPainter tp = getTextPainter(
-        value.toStringAsFixed(fixedLength), this.chartColors.nowPriceTextColor);
+      nowPrice.toStringAsFixed(fixedLength),
+      this.chartColors.nowPriceTextColor,
+    );
 
     double offsetX;
     switch (verticalTextAlignment) {
@@ -535,12 +612,14 @@ class ChartPainter extends BaseChartPainter {
 
     double top = y - tp.height / 2;
     canvas.drawRect(
-        Rect.fromLTRB(offsetX, top, offsetX + tp.width, top + tp.height),
-        nowPricePaint);
+      Rect.fromLTRB(offsetX, top, offsetX + tp.width, top + tp.height),
+      nowPricePaint,
+    );
+
     tp.paint(canvas, Offset(offsetX, top));
   }
 
-//For TrendLine
+  /// トレンドラインを描画する
   void drawTrendLines(Canvas canvas, Size size) {
     var index = calculateSelectedX(selectX);
     Paint paintY = Paint()
@@ -553,9 +632,11 @@ class ChartPainter extends BaseChartPainter {
     double y = selectY;
     // getMainY(point.close);
 
-    // k线图竖线
-    canvas.drawLine(Offset(x, mTopPadding),
-        Offset(x, size.height - mBottomPadding), paintY);
+    canvas.drawLine(
+      Offset(x, mTopPadding),
+      Offset(x, size.height - mBottomPadding),
+      paintY,
+    );
     Paint paintX = Paint()
       ..color = Colors.orangeAccent
       ..strokeWidth = 1
@@ -565,19 +646,33 @@ class ChartPainter extends BaseChartPainter {
       ..strokeWidth = 1.0
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
-    canvas.drawLine(Offset(-mTranslateX, y),
-        Offset(-mTranslateX + mWidth / scaleX, y), paintX);
+
+    canvas.drawLine(
+      Offset(-mTranslateX, y),
+      Offset(-mTranslateX + mWidth / scaleX, y),
+      paintX,
+    );
+
     if (scaleX >= 1) {
       canvas.drawOval(
-          Rect.fromCenter(
-              center: Offset(x, y), height: 15.0 * scaleX, width: 15.0),
-          paint);
+        Rect.fromCenter(
+          center: Offset(x, y),
+          height: 15.0 * scaleX,
+          width: 15.0,
+        ),
+        paint,
+      );
     } else {
       canvas.drawOval(
-          Rect.fromCenter(
-              center: Offset(x, y), height: 10.0, width: 10.0 / scaleX),
-          paint);
+        Rect.fromCenter(
+          center: Offset(x, y),
+          height: 10.0,
+          width: 10.0 / scaleX,
+        ),
+        paint,
+      );
     }
+
     if (lines.length >= 1) {
       lines.forEach((element) {
         var y1 = -((element.p1.dy - 35) / element.scale) + element.maxHeight;
@@ -586,17 +681,19 @@ class ChartPainter extends BaseChartPainter {
         var b = (trendLineMax! - y2) * trendLineScale! + trendLineContentRec!;
         var p1 = Offset(element.p1.dx, a);
         var p2 = Offset(element.p2.dx, b);
+
         canvas.drawLine(
-            p1,
-            element.p2 == Offset(-1, -1) ? Offset(x, y) : p2,
-            Paint()
-              ..color = Colors.yellow
-              ..strokeWidth = 2);
+          p1,
+          element.p2 == Offset(-1, -1) ? Offset(x, y) : p2,
+          Paint()
+            ..color = Colors.yellow
+            ..strokeWidth = 2,
+        );
       });
     }
   }
 
-  ///画交叉线
+  /// 十字線を描画する
   void drawCrossLine(Canvas canvas, Size size) {
     var index = calculateSelectedX(selectX);
     KLineEntity point = getItem(index);
@@ -606,27 +703,42 @@ class ChartPainter extends BaseChartPainter {
       ..isAntiAlias = true;
     double x = getX(index);
     double y = getMainY(point.close);
-    // k线图竖线
-    canvas.drawLine(Offset(x, mTopPadding),
-        Offset(x, size.height - mBottomPadding), paintY);
+
+    canvas.drawLine(
+      Offset(x, mTopPadding),
+      Offset(x, size.height - mBottomPadding),
+      paintY,
+    );
 
     Paint paintX = Paint()
       ..color = this.chartColors.hCrossColor
       ..strokeWidth = this.chartStyle.hCrossWidth
       ..isAntiAlias = true;
-    // k线图横线
-    canvas.drawLine(Offset(-mTranslateX, y),
-        Offset(-mTranslateX + mWidth / scaleX, y), paintX);
+
+    canvas.drawLine(
+      Offset(-mTranslateX, y),
+      Offset(-mTranslateX + mWidth / scaleX, y),
+      paintX,
+    );
+
     if (scaleX >= 1) {
       canvas.drawOval(
-          Rect.fromCenter(
-              center: Offset(x, y), height: 2.0 * scaleX, width: 2.0),
-          paintX);
+        Rect.fromCenter(
+          center: Offset(x, y),
+          height: 2.0 * scaleX,
+          width: 2.0,
+        ),
+        paintX,
+      );
     } else {
       canvas.drawOval(
-          Rect.fromCenter(
-              center: Offset(x, y), height: 2.0, width: 2.0 / scaleX),
-          paintX);
+        Rect.fromCenter(
+          center: Offset(x, y),
+          height: 2.0,
+          width: 2.0 / scaleX,
+        ),
+        paintX,
+      );
     }
   }
 
@@ -641,18 +753,20 @@ class ChartPainter extends BaseChartPainter {
   }
 
   String getDate(int? date) => dateFormat(
-      DateTime.fromMillisecondsSinceEpoch(
-          date ?? DateTime.now().millisecondsSinceEpoch),
-      mFormats);
+        DateTime.fromMillisecondsSinceEpoch(
+          date ?? DateTime.now().millisecondsSinceEpoch,
+        ),
+        mFormats,
+      );
 
   double getMainY(double y) => mMainRenderer.getY(y);
 
-  /// 点是否在SecondaryRect中
+  /// 座標が、Secondaryチャートの表示領域にあるかどうかを判断する
   bool isInSecondaryRect(Offset point) {
     return mSecondaryRect?.contains(point) ?? false;
   }
 
-  /// 点是否在MainRect中
+  /// 座標が、Mainチャートの表示領域にあるかどうかを判断する
   bool isInMainRect(Offset point) {
     return mMainRect.contains(point);
   }

@@ -132,34 +132,34 @@ abstract class BaseChartPainter extends CustomPainter {
 
   void initChartRenderer();
 
-  //画背景
+  /// 背景を描画する
   void drawBg(Canvas canvas, Size size);
 
-  //画网格
+  /// グリッドを描画する
   void drawGrid(canvas);
 
-  //画图表
+  /// チャートを描画する
   void drawChart(Canvas canvas, Size size);
 
-  // 横線の値を描画する
+  /// 横線の値を描画する
   void drawVerticalText(canvas);
 
-  //画时间
+  /// 日付を描画する
   void drawDate(Canvas canvas, Size size);
 
-  //画值
+  /// テキストを描画する
   void drawText(Canvas canvas, KLineEntity data, double x);
 
-  //画最大最小值
+  /// 現在、ディスプレイ内に表示している範囲での、価格の最大値と最小値を描画する
   void drawMaxAndMin(Canvas canvas);
 
-  //画当前价格
+  /// 現在価格を描画する
   void drawNowPrice(Canvas canvas);
 
-  //画交叉线
+  /// 十字線を描画する
   void drawCrossLine(Canvas canvas, Size size);
 
-  //交叉线值
+  /// 十字線の値のテキストを描画する
   void drawCrossLineText(Canvas canvas, Size size);
 
   void initRect(Size size) {
@@ -195,7 +195,7 @@ abstract class BaseChartPainter extends CustomPainter {
     }
   }
 
-  calculateValue() {
+  void calculateValue() {
     if (datas == null) return;
     if (datas!.isEmpty) return;
     maxScrollX = getMinTranslateX().abs();
