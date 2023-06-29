@@ -38,7 +38,7 @@ class MainRenderer extends BaseChartRenderer<CandleEntity> {
 
   /// チャートの表示領域の上下のパディング
   /// * 現状、この値は、チャート描画時に正しく参照されていないので、使用しないこと。
-  double _contentPadding = 0.0;
+  double _contentPadding = 5.0;
 
   /// 移動平均線の日数リスト
   List<int> maDayList;

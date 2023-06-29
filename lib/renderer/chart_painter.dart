@@ -67,6 +67,7 @@ class ChartPainter extends BaseChartPainter {
     mainState,
     volHidden,
     secondaryState,
+    secondaryScale,
     this.sink,
     bool isLine = false,
     this.hideGrid = false,
@@ -84,6 +85,7 @@ class ChartPainter extends BaseChartPainter {
             mainState: mainState,
             volHidden: volHidden,
             secondaryState: secondaryState,
+            secondaryScale: secondaryScale,
             xFrontPadding: xFrontPadding,
             isLine: isLine) {
     selectPointPaint = Paint()
@@ -122,19 +124,27 @@ class ChartPainter extends BaseChartPainter {
       maDayList,
     );
     if (mVolRect != null) {
-      mVolRenderer = VolRenderer(mVolRect!, mVolMaxValue, mVolMinValue,
-          mChildPadding, fixedLength, this.chartStyle, this.chartColors);
+      mVolRenderer = VolRenderer(
+        mVolRect!,
+        mVolMaxValue,
+        mVolMinValue,
+        mChildPadding,
+        fixedLength,
+        this.chartStyle,
+        this.chartColors,
+      );
     }
     if (mSecondaryRect != null) {
       mSecondaryRenderer = SecondaryRenderer(
-          mSecondaryRect!,
-          mSecondaryMaxValue,
-          mSecondaryMinValue,
-          mChildPadding,
-          secondaryState,
-          fixedLength,
-          chartStyle,
-          chartColors);
+        mSecondaryRect!,
+        mSecondaryMaxValue,
+        mSecondaryMinValue,
+        mChildPadding,
+        secondaryState,
+        fixedLength,
+        chartStyle,
+        chartColors,
+      );
     }
   }
 

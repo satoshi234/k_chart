@@ -94,53 +94,81 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      shrinkWrap: true,
-      children: <Widget>[
-        Stack(children: <Widget>[
-          Container(
-            height: 450,
-            width: double.infinity,
-            child: KChartWidget(
-              datas,
-              chartStyle,
-              chartColors,
-              isLine: isLine,
-              onSecondaryTap: () {
-                print('Secondary Tap');
-              },
-              isTrendLine: _isTrendLine,
-              mainState: _mainState,
-              volHidden: _volHidden,
-              secondaryState: _secondaryState,
-              fixedLength: 2,
-              timeFormat: TimeFormat.YEAR_MONTH_DAY,
-              translations: kChartTranslations,
-              showNowPrice: _showNowPrice,
-              //`isChinese` is Deprecated, Use `translations` instead.
-              isChinese: isChinese,
-              hideGrid: _hideGrid,
-              isTapShowInfoDialog: false,
-              verticalTextAlignment: _verticalTextAlignment,
-              maDayList: [1, 100, 1000],
-            ),
-          ),
-          if (showLoading)
-            Container(
-                width: double.infinity,
-                height: 450,
-                alignment: Alignment.center,
-                child: const CircularProgressIndicator()),
-        ]),
-        buildButtons(),
-        if (_bids != null && _asks != null)
-          Container(
-            height: 230,
-            width: double.infinity,
-            child: DepthChart(_bids!, _asks!, chartColors),
-          )
-      ],
+    return Container(
+      height: 450,
+      width: double.infinity,
+      child: KChartWidget(
+        datas,
+        chartStyle,
+        chartColors,
+        isLine: false,
+        onSecondaryTap: () {
+          print('Secondary Tap');
+        },
+        isTrendLine: _isTrendLine,
+        mainState: _mainState,
+        volHidden: true,
+        secondaryState: _secondaryState,
+        fixedLength: 2,
+        timeFormat: TimeFormat.YEAR_MONTH_DAY,
+        translations: kChartTranslations,
+        showNowPrice: _showNowPrice,
+        //`isChinese` is Deprecated, Use `translations` instead.
+        isChinese: isChinese,
+        hideGrid: _hideGrid,
+        isTapShowInfoDialog: false,
+        verticalTextAlignment: _verticalTextAlignment,
+        maDayList: [1, 100, 1000],
+      ),
     );
+
+    // return ListView(
+    //   shrinkWrap: true,
+    //   children: <Widget>[
+    //     Stack(children: <Widget>[
+    //       Container(
+    //         height: 450,
+    //         width: double.infinity,
+    //         child: KChartWidget(
+    //           datas,
+    //           chartStyle,
+    //           chartColors,
+    //           isLine: isLine,
+    //           onSecondaryTap: () {
+    //             print('Secondary Tap');
+    //           },
+    //           isTrendLine: _isTrendLine,
+    //           mainState: _mainState,
+    //           volHidden: _volHidden,
+    //           secondaryState: _secondaryState,
+    //           fixedLength: 2,
+    //           timeFormat: TimeFormat.YEAR_MONTH_DAY,
+    //           translations: kChartTranslations,
+    //           showNowPrice: _showNowPrice,
+    //           //`isChinese` is Deprecated, Use `translations` instead.
+    //           isChinese: isChinese,
+    //           hideGrid: _hideGrid,
+    //           isTapShowInfoDialog: false,
+    //           verticalTextAlignment: _verticalTextAlignment,
+    //           maDayList: [1, 100, 1000],
+    //         ),
+    //       ),
+    //       if (showLoading)
+    //         Container(
+    //             width: double.infinity,
+    //             height: 450,
+    //             alignment: Alignment.center,
+    //             child: const CircularProgressIndicator()),
+    //     ]),
+    //     buildButtons(),
+    //     if (_bids != null && _asks != null)
+    //       Container(
+    //         height: 230,
+    //         width: double.infinity,
+    //         child: DepthChart(_bids!, _asks!, chartColors),
+    //       )
+    //   ],
+    // );
   }
 
   Widget buildButtons() {
@@ -190,13 +218,13 @@ class _MyHomePageState extends State<MyHomePage> {
         }),
         button("Change PriceTextPaint",
             onPressed: () => setState(() {
-              _priceLeft = !_priceLeft;
-              if (_priceLeft) {
-                _verticalTextAlignment = VerticalTextAlignment.left;
-              } else {
-                _verticalTextAlignment = VerticalTextAlignment.right;
-              }
-            })),
+                  _priceLeft = !_priceLeft;
+                  if (_priceLeft) {
+                    _verticalTextAlignment = VerticalTextAlignment.left;
+                  } else {
+                    _verticalTextAlignment = VerticalTextAlignment.right;
+                  }
+                })),
       ],
     );
   }

@@ -54,12 +54,12 @@ abstract class BaseChartRenderer<T> {
     // gridPaint.colorは、指定されたgridColorに設定
     gridPaint.color = gridColor;
 
-    // debug
-    print(
-      "===== maxValue: ${maxValue.toString()}" +
-          ", minValue: ${minValue.toString()}" +
-          ", scaleY: ${scaleY.toString()}",
-    );
+    // // debug
+    // print(
+    //   "===== maxValue: ${maxValue.toString()}" +
+    //       ", minValue: ${minValue.toString()}" +
+    //       ", scaleY: ${scaleY.toString()}",
+    // );
   }
 
   /// 値に基づいてチャート上の点のy座標を計算するために使用する

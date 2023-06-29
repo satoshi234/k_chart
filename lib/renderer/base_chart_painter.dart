@@ -17,6 +17,7 @@ abstract class BaseChartPainter extends CustomPainter {
   MainState mainState;
 
   SecondaryState secondaryState;
+  double secondaryScale;
 
   bool volHidden;
   bool isTapShowInfoDialog;
@@ -60,6 +61,7 @@ abstract class BaseChartPainter extends CustomPainter {
     this.volHidden = false,
     this.isTapShowInfoDialog = false,
     this.secondaryState = SecondaryState.MACD,
+    this.secondaryScale = 0.2,
     this.isLine = false,
   }) {
     mItemCount = datas?.length ?? 0;
@@ -162,8 +164,9 @@ abstract class BaseChartPainter extends CustomPainter {
 
   void initRect(Size size) {
     double volHeight = volHidden != true ? mDisplayHeight * 0.2 : 0;
-    double secondaryHeight =
-        secondaryState != SecondaryState.NONE ? mDisplayHeight * 0.2 : 0;
+    double secondaryHeight = secondaryState != SecondaryState.NONE
+        ? mDisplayHeight * secondaryScale
+        : 0;
 
     double mainHeight = mDisplayHeight;
     mainHeight -= volHeight;
@@ -172,17 +175,23 @@ abstract class BaseChartPainter extends CustomPainter {
     mMainRect = Rect.fromLTRB(0, mTopPadding, mWidth, mTopPadding + mainHeight);
 
     if (volHidden != true) {
-      mVolRect = Rect.fromLTRB(0, mMainRect.bottom + mChildPadding, mWidth,
-          mMainRect.bottom + volHeight);
+      mVolRect = Rect.fromLTRB(
+        0,
+        mMainRect.bottom + mChildPadding,
+        mWidth,
+        mMainRect.bottom + volHeight,
+      );
     }
 
-    //secondaryState == SecondaryState.NONE隐藏副视图
     if (secondaryState != SecondaryState.NONE) {
+      // Secondaryチャートの状態が、NONE以外の場合、
+      // Secondaryチャートを描画する
       mSecondaryRect = Rect.fromLTRB(
-          0,
-          mMainRect.bottom + volHeight + mChildPadding,
-          mWidth,
-          mMainRect.bottom + volHeight + secondaryHeight);
+        0,
+        mMainRect.bottom + volHeight + mChildPadding,
+        mWidth,
+        mMainRect.bottom + volHeight + secondaryHeight,
+      );
     }
   }
 

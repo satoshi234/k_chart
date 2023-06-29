@@ -136,6 +136,9 @@ class _KChartWidgetState extends State<KChartWidget>
   bool waitingForOtherPairofCords = false;
   bool enableCordRecord = false;
 
+  double _mSecondaryScale = 0.2;
+  double _lastSecondaryScale = 0.2;
+
   double getMinScrollX() {
     return mScaleX;
   }
@@ -185,6 +188,7 @@ class _KChartWidgetState extends State<KChartWidget>
       mainState: widget.mainState,
       volHidden: widget.volHidden,
       secondaryState: widget.secondaryState,
+      secondaryScale: _mSecondaryScale,
       isLine: widget.isLine,
       hideGrid: widget.hideGrid,
       showNowPrice: widget.showNowPrice,
@@ -202,9 +206,10 @@ class _KChartWidgetState extends State<KChartWidget>
         return GestureDetector(
           onTapUp: (details) {
             if (!widget.isTrendLine &&
-                widget.onSecondaryTap != null &&
                 _painter.isInSecondaryRect(details.localPosition)) {
-              widget.onSecondaryTap!();
+              if (widget.onSecondaryTap != null) {
+                widget.onSecondaryTap!();
+              }
             }
 
             if (!widget.isTrendLine &&
@@ -216,12 +221,20 @@ class _KChartWidgetState extends State<KChartWidget>
                 notifyChanged();
               }
             }
+
             if (widget.isTrendLine && !isLongPress && enableCordRecord) {
               enableCordRecord = false;
               Offset p1 = Offset(getTrendLineX(), mSelectY);
-              if (!waitingForOtherPairofCords)
-                lines.add(TrendLine(
-                    p1, Offset(-1, -1), trendLineMax!, trendLineScale!));
+              if (!waitingForOtherPairofCords) {
+                lines.add(
+                  TrendLine(
+                    p1,
+                    Offset(-1, -1),
+                    trendLineMax!,
+                    trendLineScale!,
+                  ),
+                );
+              }
 
               if (waitingForOtherPairofCords) {
                 var a = lines.last;
@@ -231,6 +244,7 @@ class _KChartWidgetState extends State<KChartWidget>
               } else {
                 waitingForOtherPairofCords = true;
               }
+
               notifyChanged();
             }
           },
@@ -240,6 +254,8 @@ class _KChartWidgetState extends State<KChartWidget>
             _onDragChanged(true);
           },
           onHorizontalDragUpdate: (details) {
+            print('onHorizontalDragUpdate');
+
             if (isScale || isLongPress) return;
             mScrollX = ((details.primaryDelta ?? 0) / mScaleX + mScrollX)
                 .clamp(0.0, ChartPainter.maxScrollX)
@@ -250,26 +266,58 @@ class _KChartWidgetState extends State<KChartWidget>
             var velocity = details.velocity.pixelsPerSecond.dx;
             _onFling(velocity);
           },
-          onHorizontalDragCancel: () => _onDragChanged(false),
-          onScaleStart: (_) {
+          onHorizontalDragCancel: () {
+            print('onHorizontalDragCancel');
+
+            _onDragChanged(false);
+          },
+          onScaleStart: (details) {
+            print('onScaleStart');
+
             // x軸のスケール変更開始
             isScale = true;
           },
           onScaleUpdate: (details) {
-            if (isDrag || isLongPress) return;
+            print('onScaleUpdate');
 
-            // x軸のスケールを変更する
-            // * ある一定値の中に収まるように調整する
-            mScaleX = (_lastScale * details.scale).clamp(0.1, 2.2);
-            notifyChanged();
+            if (isDrag || isLongPress) {
+              return;
+            }
+
+            if (details.pointerCount == 1) {
+              // 1点ポインターである場合
+
+              print('delta: ${details.focalPointDelta}');
+
+              if (_painter.isInSecondaryRect(details.localFocalPoint)) {
+                // Secondaryチャートのスケールを変更する
+                // * ある一定値の中に収まるように調整する
+                final deltaScale = details.focalPointDelta.dy / mHeight;
+                _mSecondaryScale =
+                    (_mSecondaryScale - deltaScale).clamp(0.1, 0.9);
+
+                notifyChanged();
+              }
+            } else if (details.pointerCount == 2) {
+              // 2点ポインターである場合
+
+              // x軸のスケールを変更する
+              // * ある一定値の中に収まるように調整する
+              mScaleX = (_lastScale * details.scale).clamp(0.1, 2.2);
+              notifyChanged();
+            }
           },
           onScaleEnd: (_) {
+            print('onScaleEnd');
+
             // x軸のスケール変更終了
             // スケールの値を保存する
             isScale = false;
             _lastScale = mScaleX;
           },
           onLongPressStart: (details) {
+            print('onLongPressStart');
+
             isOnTap = false;
             isLongPress = true;
             if ((mSelectX != details.localPosition.dx ||
@@ -348,11 +396,18 @@ class _KChartWidgetState extends State<KChartWidget>
 
   void _onFling(double x) {
     _controller = AnimationController(
-        duration: Duration(milliseconds: widget.flingTime), vsync: this);
+      duration: Duration(milliseconds: widget.flingTime),
+      vsync: this,
+    );
+
     aniX = null;
-    aniX = Tween<double>(begin: mScrollX, end: x * widget.flingRatio + mScrollX)
-        .animate(CurvedAnimation(
-            parent: _controller!.view, curve: widget.flingCurve));
+    aniX = Tween<double>(
+      begin: mScrollX,
+      end: x * widget.flingRatio + mScrollX,
+    ).animate(
+      CurvedAnimation(parent: _controller!.view, curve: widget.flingCurve),
+    );
+
     aniX!.addListener(() {
       mScrollX = aniX!.value;
       if (mScrollX <= 0) {
@@ -377,6 +432,7 @@ class _KChartWidgetState extends State<KChartWidget>
         notifyChanged();
       }
     });
+
     _controller!.forward();
   }
 
