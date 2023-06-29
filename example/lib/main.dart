@@ -100,7 +100,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    chartStyle.dateTimeFormat = TimeFormat.HOUR_MINUTE;
+
+    return SizedBox(
       height: 450,
       width: double.infinity,
       child: KChartWidget(
@@ -116,7 +118,7 @@ class _MyHomePageState extends State<MyHomePage> {
         volHidden: true,
         secondaryState: _secondaryState,
         fixedLength: 2,
-        timeFormat: TimeFormat.YEAR_MONTH_DAY,
+        timeFormat: TimeFormat.YEAR_MONTH_DAY_WITH_HOUR,
         translations: kChartTranslations,
         showNowPrice: _showNowPrice,
         hideGrid: _hideGrid,

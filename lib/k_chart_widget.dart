@@ -53,6 +53,7 @@ class TimeFormat {
     ':',
     nn
   ];
+  static const List<String> HOUR_MINUTE = [HH, ':', nn];
 }
 
 class KChartWidget extends StatefulWidget {
@@ -586,6 +587,6 @@ class _KChartWidgetState extends State<KChartWidget>
         DateTime.fromMillisecondsSinceEpoch(
           date ?? DateTime.now().millisecondsSinceEpoch,
         ),
-        TimeFormat.YEAR_MONTH_DAY,
+        widget.timeFormat,
       );
 }

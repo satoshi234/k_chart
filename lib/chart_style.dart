@@ -108,7 +108,7 @@ class ChartStyle {
   /// チャートのグリッドの列数
   int gridColumns = 5;
 
-  /// 日付のフォーマット文字列
-  /// ex) yyyy-MM-dd HH:mm
+  /// チャートの日付のフォーマット文字列
+  /// ex) HH:mm
   List<String>? dateTimeFormat;
 }
