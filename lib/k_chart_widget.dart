@@ -5,9 +5,40 @@ import 'package:k_chart/chart_translations.dart';
 import 'package:k_chart/extension/map_ext.dart';
 import 'package:k_chart/flutter_k_chart.dart';
 
-enum MainState { MA, BOLL, NONE }
+/// Mainチャートの状態
+enum MainState {
+  /// MA
+  MA,
 
-enum SecondaryState { MACD, KDJ, RSI, WR, CCI, NONE }
+  /// ボリンジャーバンド
+  BOLL,
+
+  /// なし
+  NONE,
+  ;
+}
+
+/// Secondaryチャートの状態
+enum SecondaryState {
+  /// MACD
+  MACD,
+
+  /// KDJ
+  KDJ,
+
+  /// RSI
+  RSI,
+
+  /// WR
+  WR,
+
+  /// CCI
+  CCI,
+
+  /// なし
+  NONE,
+  ;
+}
 
 class TimeFormat {
   static const List<String> YEAR_MONTH_DAY = [yyyy, '-', mm, '-', dd];
@@ -136,6 +167,7 @@ class _KChartWidgetState extends State<KChartWidget>
       mScrollX = mSelectX = 0.0;
       mScaleX = 1.0;
     }
+
     final _painter = ChartPainter(
       widget.chartStyle,
       widget.chartColors,
@@ -220,14 +252,20 @@ class _KChartWidgetState extends State<KChartWidget>
           },
           onHorizontalDragCancel: () => _onDragChanged(false),
           onScaleStart: (_) {
+            // x軸のスケール変更開始
             isScale = true;
           },
           onScaleUpdate: (details) {
             if (isDrag || isLongPress) return;
-            mScaleX = (_lastScale * details.scale).clamp(0.5, 2.2);
+
+            // x軸のスケールを変更する
+            // * ある一定値の中に収まるように調整する
+            mScaleX = (_lastScale * details.scale).clamp(0.1, 2.2);
             notifyChanged();
           },
           onScaleEnd: (_) {
+            // x軸のスケール変更終了
+            // スケールの値を保存する
             isScale = false;
             _lastScale = mScaleX;
           },

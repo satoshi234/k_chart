@@ -139,7 +139,7 @@ abstract class BaseChartPainter extends CustomPainter {
   //画图表
   void drawChart(Canvas canvas, Size size);
 
-  //画右边值
+  // 横線の値を描画する
   void drawVerticalText(canvas);
 
   //画时间

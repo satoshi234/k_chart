@@ -6,10 +6,11 @@ abstract class BaseChartRenderer<T> {
   /// チャートデータの最大値と最小値
   double maxValue, minValue;
 
-  /// チャートデータをチャートの境界内に収めるために使用するスケール
+  /// Y軸の1単位ごとの高さ
   late double scaleY;
 
-  /// チャートの上部の余白
+  /// チャートの表示領域の上部の余白
+  /// * この値が、テキスト表示領域の高さとなる。
   double topPadding;
 
   /// チャートの境界

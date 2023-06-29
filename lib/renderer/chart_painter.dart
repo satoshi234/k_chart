@@ -181,27 +181,64 @@ class ChartPainter extends BaseChartPainter {
 
   @override
   void drawChart(Canvas canvas, Size size) {
+    // restore()で戻れるようにするために、save()する。
     canvas.save();
-    canvas.translate(mTranslateX * scaleX, 0.0);
-    canvas.scale(scaleX, 1.0);
-    for (int i = mStartIndex; datas != null && i <= mStopIndex; i++) {
-      KLineEntity? curPoint = datas?[i];
-      if (curPoint == null) continue;
-      KLineEntity lastPoint = i == 0 ? curPoint : datas![i - 1];
-      double curX = getX(i);
-      double lastX = i == 0 ? curX : getX(i - 1);
 
+    // mTranslateX * scaleXだけ、横に平行移動させる。
+    canvas.translate(mTranslateX * scaleX, 0.0);
+    // x軸方向の拡大縮小を行う。
+    canvas.scale(scaleX, 1.0);
+
+    // mStartIndexから、mStopIndexまでのチャートを描画する。
+    for (int i = mStartIndex; datas != null && i <= mStopIndex; i++) {
+      // 現在値
+      final curPoint = datas?[i];
+      if (curPoint == null) continue;
+
+      // 現在値のX座標
+      final curX = getX(i);
+
+      final KLineEntity lastPoint;
+      final double lastX;
+      if (i == 0) {
+        lastPoint = curPoint;
+        lastX = curX;
+      } else {
+        lastPoint = datas![i - 1];
+        lastX = getX(i - 1);
+      }
+
+      // Mainチャートを描画する。
       mMainRenderer.drawChart(lastPoint, curPoint, lastX, curX, size, canvas);
+
+      // Volチャートを描画する。
       mVolRenderer?.drawChart(lastPoint, curPoint, lastX, curX, size, canvas);
+
+      // Secondaryチャートを描画する。
       mSecondaryRenderer?.drawChart(
-          lastPoint, curPoint, lastX, curX, size, canvas);
+        lastPoint,
+        curPoint,
+        lastX,
+        curX,
+        size,
+        canvas,
+      );
     }
 
-    if ((isLongPress == true || (isTapShowInfoDialog && isOnTap)) &&
-        isTrendLine == false) {
+    final displayCross =
+        (isLongPress == true || (isTapShowInfoDialog && isOnTap)) &&
+            isTrendLine == false;
+    if (displayCross) {
+      // 十字線を描画する
       drawCrossLine(canvas, size);
     }
-    if (isTrendLine == true) drawTrendLines(canvas, size);
+
+    if (isTrendLine == true) {
+      // トレンドラインを描画する。
+      drawTrendLines(canvas, size);
+    }
+
+    // restore()でsave()した状態に戻す。
     canvas.restore();
   }
 
