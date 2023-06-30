@@ -54,4 +54,14 @@ const kChartTranslations = {
     change: '涨跌幅',
     amount: '成交额',
   ),
+  'ja_JP': ChartTranslations(
+    date: '日時',
+    open: '始値',
+    high: '高値',
+    low: '安値',
+    close: '終値',
+    changeAmount: '変動値',
+    change: '変動率',
+    amount: '出来高',
+  ),
 };

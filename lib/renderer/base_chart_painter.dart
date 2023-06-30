@@ -17,6 +17,7 @@ abstract class BaseChartPainter extends CustomPainter {
   MainState mainState;
 
   SecondaryState secondaryState;
+  double secondaryScale;
 
   bool volHidden;
   bool isTapShowInfoDialog;
@@ -44,7 +45,7 @@ abstract class BaseChartPainter extends CustomPainter {
   double mDataLen = 0.0; //数据占屏幕总长度
   final ChartStyle chartStyle;
   late double mPointWidth;
-  List<String> mFormats = [yyyy, '-', mm, '-', dd, ' ', HH, ':', nn]; //格式化时间
+  List<String> mFormats = [yyyy, '-', mm, '-', dd, ' ', HH, ':', nn];
   double xFrontPadding;
 
   BaseChartPainter(
@@ -60,6 +61,7 @@ abstract class BaseChartPainter extends CustomPainter {
     this.volHidden = false,
     this.isTapShowInfoDialog = false,
     this.secondaryState = SecondaryState.MACD,
+    this.secondaryScale = 0.2,
     this.isLine = false,
   }) {
     mItemCount = datas?.length ?? 0;
@@ -130,40 +132,41 @@ abstract class BaseChartPainter extends CustomPainter {
 
   void initChartRenderer();
 
-  //画背景
+  /// 背景を描画する
   void drawBg(Canvas canvas, Size size);
 
-  //画网格
+  /// グリッドを描画する
   void drawGrid(canvas);
 
-  //画图表
+  /// チャートを描画する
   void drawChart(Canvas canvas, Size size);
 
-  //画右边值
+  /// 横線の値を描画する
   void drawVerticalText(canvas);
 
-  //画时间
+  /// 日付を描画する
   void drawDate(Canvas canvas, Size size);
 
-  //画值
+  /// テキストを描画する
   void drawText(Canvas canvas, KLineEntity data, double x);
 
-  //画最大最小值
+  /// 現在、ディスプレイ内に表示している範囲での、価格の最大値と最小値を描画する
   void drawMaxAndMin(Canvas canvas);
 
-  //画当前价格
+  /// 現在価格を描画する
   void drawNowPrice(Canvas canvas);
 
-  //画交叉线
+  /// 十字線を描画する
   void drawCrossLine(Canvas canvas, Size size);
 
-  //交叉线值
+  /// 十字線の値のテキストを描画する
   void drawCrossLineText(Canvas canvas, Size size);
 
   void initRect(Size size) {
     double volHeight = volHidden != true ? mDisplayHeight * 0.2 : 0;
-    double secondaryHeight =
-        secondaryState != SecondaryState.NONE ? mDisplayHeight * 0.2 : 0;
+    double secondaryHeight = secondaryState != SecondaryState.NONE
+        ? mDisplayHeight * secondaryScale
+        : 0;
 
     double mainHeight = mDisplayHeight;
     mainHeight -= volHeight;
@@ -172,21 +175,27 @@ abstract class BaseChartPainter extends CustomPainter {
     mMainRect = Rect.fromLTRB(0, mTopPadding, mWidth, mTopPadding + mainHeight);
 
     if (volHidden != true) {
-      mVolRect = Rect.fromLTRB(0, mMainRect.bottom + mChildPadding, mWidth,
-          mMainRect.bottom + volHeight);
+      mVolRect = Rect.fromLTRB(
+        0,
+        mMainRect.bottom + mChildPadding,
+        mWidth,
+        mMainRect.bottom + volHeight,
+      );
     }
 
-    //secondaryState == SecondaryState.NONE隐藏副视图
     if (secondaryState != SecondaryState.NONE) {
+      // Secondaryチャートの状態が、NONE以外の場合、
+      // Secondaryチャートを描画する
       mSecondaryRect = Rect.fromLTRB(
-          0,
-          mMainRect.bottom + volHeight + mChildPadding,
-          mWidth,
-          mMainRect.bottom + volHeight + secondaryHeight);
+        0,
+        mMainRect.bottom + volHeight + mChildPadding,
+        mWidth,
+        mMainRect.bottom + volHeight + secondaryHeight,
+      );
     }
   }
 
-  calculateValue() {
+  void calculateValue() {
     if (datas == null) return;
     if (datas!.isEmpty) return;
     maxScrollX = getMinTranslateX().abs();

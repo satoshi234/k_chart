@@ -5,10 +5,15 @@ class KLineEntity extends KEntity {
   late double high;
   late double low;
   late double close;
+  // 取引金額の合計値
   late double vol;
+  // 総取引lot数
   late double? amount;
+  // close - open
   double? change;
+  // change / open * 100
   double? ratio;
+  // millisecondsSinceEpoch
   int? time;
 
   KLineEntity.fromCustom({
