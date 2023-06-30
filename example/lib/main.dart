@@ -117,7 +117,7 @@ class _MyHomePageState extends State<MyHomePage> {
         mainState: _mainState,
         volHidden: true,
         secondaryState: _secondaryState,
-        fixedLength: 2,
+        fixedLength: 5,
         timeFormat: TimeFormat.YEAR_MONTH_DAY_WITH_HOUR,
         translations: kChartTranslations,
         showNowPrice: _showNowPrice,
