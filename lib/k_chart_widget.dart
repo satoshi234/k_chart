@@ -41,7 +41,8 @@ enum SecondaryState {
 }
 
 class TimeFormat {
-  static const List<String> MONTH_DAY = [mm, '-', dd];
+  static const List<String> MONTH_DAY1 = [mm, '-', dd];
+  static const List<String> MONTH_DAY2 = [mm, '/', dd];
   static const List<String> YEAR_MONTH_DAY = [yyyy, '-', mm, '-', dd];
   static const List<String> YEAR_MONTH_DAY_WITH_HOUR = [
     yyyy,
